@@ -108,6 +108,8 @@
     notes: [],
     editing: false,
     onlyOpen: true,
+    returning: 0,
+    lastReturn: 0,
     notice: "Sample shift · All records are fictional.",
   });
   let s = original();
@@ -158,6 +160,15 @@
     "</div></div>";
   const badge = (t, good = false) =>
     '<span class="tag' + (good ? " good" : "") + '">' + esc(t) + "</span>";
+  const closeLoan = (num) => {
+    const loan = s.loans.find((item) => item.num === Number(num));
+    if (!loan || loan.back) return false;
+    loan.back = true;
+    s.returning = 0;
+    s.lastReturn = loan.num;
+    s.notice = loan.asset + " returned to stock. Slip L-" + loan.num + " closed.";
+    return true;
+  };
   function requestPage() {
     let html = head(
       "Approved requests",
@@ -295,8 +306,10 @@
     return html;
   }
   function handoverSnapshot() {
-    const openLoans = s.loans.filter((l) => !l.back).slice().reverse();
-    const filmLoans = openLoans.filter((l) => l.req === "RQ-214");
+    const openLoans = s.loans.filter((loan) => !loan.back).slice().reverse();
+    const filmLoans = openLoans.filter((loan) => loan.req === "RQ-214");
+    const filmIssued = s.loans.filter((loan) => loan.req === "RQ-214");
+    const filmReturned = filmIssued.filter((loan) => loan.back).length;
     const story =
       s.phase === 0
         ? "Issue each Film Society unit once it leaves the counter; it will appear here for the next shift."
@@ -311,6 +324,15 @@
       "</span></div><p>" +
       esc(story) +
       "</p>";
+    if (filmIssued.length)
+      html +=
+        '<p class="handover-focus"><b>Screening kit:</b> ' +
+        filmReturned +
+        " of " +
+        filmIssued.length +
+        " issued " +
+        (filmIssued.length === 1 ? "unit has" : "units have") +
+        " been returned.</p>";
     if (filmLoans.length)
       html +=
         '<p class="handover-focus"><b>Film Society focus:</b> ' +
@@ -318,31 +340,66 @@
         " outstanding " +
         (filmLoans.length === 1 ? "unit" : "units") +
         ".</p>";
-    else if (s.phase > 0)
+    else if (s.phase > 0 && filmIssued.length)
       html +=
-        '<p class="handover-focus"><b>Film Society focus:</b> no open units recorded.</p>';
-    if (!openLoans.length)
-      return html + '<p class="handover-empty">Nothing is waiting for the next shift.</p></section>';
-    html += '<ul class="handover-list">';
-    for (const loan of openLoans) {
-      const asset = getAsset(loan.asset);
-      const request = getReq(loan.req);
-      html +=
-        "<li><div><strong>" +
-        esc(loan.asset + " · " + asset.type) +
-        "</strong><small>Slip L-" +
-        esc(loan.num) +
-        " · " +
-        esc(request.club) +
-        " · " +
-        esc(loan.who) +
-        " · Due " +
-        esc(loan.due) +
-        "</small></div>" +
-        badge("Open") +
-        "</li>";
+        '<p class="handover-focus"><b>Film Society focus:</b> all issued units are back.</p>';
+    if (!openLoans.length) {
+      html += '<p class="handover-empty">Nothing is waiting for the next shift.</p>';
+    } else {
+      html += '<ul class="handover-list">';
+      for (const loan of openLoans) {
+        const asset = getAsset(loan.asset);
+        const request = getReq(loan.req);
+        html +=
+          "<li><div><strong>" +
+          esc(loan.asset + " · " + asset.type) +
+          "</strong><small>Slip L-" +
+          esc(loan.num) +
+          " · " +
+          esc(request.club) +
+          " · " +
+          esc(loan.who) +
+          " · Due " +
+          esc(loan.due) +
+          "</small></div>" +
+          btn("Verify & return", "start-return", String(loan.num), "primary") +
+          "</li>";
+      }
+      html += "</ul>";
     }
-    return html + "</ul></section>";
+    const lastReturn = s.loans.find((loan) => loan.num === Number(s.lastReturn));
+    if (lastReturn?.back)
+      html +=
+        '<div class="handover-actions"><span>Recorded ' +
+        esc(lastReturn.asset) +
+        " as returned.</span>" +
+        btn("Undo last return", "undo-return") +
+        "</div>";
+    return html + "</section>";
+  }
+  function returnCheck() {
+    const loan = s.loans.find((item) => item.num === Number(s.returning));
+    if (!loan || loan.back) return "";
+    const asset = getAsset(loan.asset);
+    const request = getReq(loan.req);
+    return (
+      '<section class="return-check" aria-labelledby="return-check-title"><div class="return-check-heading"><div><small>Return verification</small><h3 id="return-check-title">Check the physical item before closing its loan</h3></div>' +
+      badge("Open") +
+      "</div><p><b>" +
+      esc(loan.asset + " · " + asset.type) +
+      "</b> is on slip L-" +
+      esc(loan.num) +
+      " for " +
+      esc(request.club) +
+      ". Confirm the asset tag before recording the return.</p>" +
+      '<form data-return><input type="hidden" name="loan" value="' +
+      esc(loan.num) +
+      '"><label class="check"><input type="checkbox" name="verified" required> I matched the physical asset tag to ' +
+      esc(loan.asset) +
+      '.</label><div class="buttons">' +
+      btn("Cancel", "cancel-return") +
+      '<button type="submit" class="primary">Record verified return</button></div></form></section>'
+    );
   }
   function deskbook() {
     let html = head(
@@ -412,7 +469,7 @@
           "</button>",
       )
       .join("");
-    q("[data-page]").innerHTML = screens[s.tab]();
+    q("[data-page]").innerHTML = returnCheck() + screens[s.tab]();
     if (q("[data-filter]")) q("[data-filter]").value = s.filter;
     q("[data-status]").textContent = s.notice;
   }
@@ -457,13 +514,26 @@
       case "scope":
         s.onlyOpen = v === "0";
         break;
-      case "return": {
-        const l = s.loans.find((l) => l.num === Number(v));
-        if (!l || l.back) return;
-        l.back = true;
-        s.notice = l.asset + " returned to stock. Slip L-" + l.num + " closed.";
+      case "start-return": {
+        const loan = s.loans.find((item) => item.num === Number(v));
+        if (!loan || loan.back) return;
+        s.returning = loan.num;
         break;
       }
+      case "cancel-return":
+        s.returning = 0;
+        break;
+      case "undo-return": {
+        const loan = s.loans.find((item) => item.num === Number(s.lastReturn));
+        if (!loan || !loan.back) return;
+        loan.back = false;
+        s.lastReturn = 0;
+        s.notice = loan.asset + " restored to the outstanding list.";
+        break;
+      }
+      case "return":
+        if (!closeLoan(v)) return;
+        break;
     }
     commit();
   });
@@ -477,6 +547,12 @@
     e.preventDefault();
     const f = e.target;
     const form = new FormData(f);
+    if (f.matches("[data-return]")) {
+      const num = Number(form.get("loan"));
+      if (!form.get("verified") || !closeLoan(num)) return;
+      commit();
+      return;
+    }
     if (f.matches("[data-note]")) {
       const text = String(form.get("note")).trim();
       if (!text) return;
@@ -533,6 +609,8 @@
     s = {
       ...original(),
       ...d,
+      returning: 0,
+      lastReturn: 0,
       loans: d.loans.map((l) => ({ ...l })),
       notes: d.notes.map((n) => ({ ...n })),
     };
