@@ -272,6 +272,68 @@ body > main {
 #campus-stores .record p {
   margin-top: 5px;
 }
+#campus-stores .handover-panel {
+  margin: 0 0 16px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--mark);
+  background: var(--memo);
+  color: var(--memotxt);
+}
+#campus-stores .handover-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+#campus-stores .handover-heading small,
+#campus-stores .handover-list small {
+  color: inherit;
+  opacity: 0.86;
+}
+#campus-stores .handover-count {
+  white-space: nowrap;
+  background: var(--paper);
+  color: var(--memotxt);
+  border: 1px solid color-mix(in srgb, var(--memotxt) 30%, transparent);
+  border-radius: 99px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 650;
+}
+#campus-stores .handover-panel > p {
+  margin-top: 7px;
+}
+#campus-stores .handover-focus {
+  font-size: 13px;
+}
+#campus-stores .handover-list {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+#campus-stores .handover-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 9px;
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--memotxt) 24%, transparent);
+}
+#campus-stores .handover-list strong,
+#campus-stores .handover-list small {
+  display: block;
+}
+#campus-stores .handover-list .tag {
+  background: var(--paper);
+  color: var(--memotxt);
+}
+#campus-stores .handover-empty {
+  font-weight: 600;
+}
 #campus-stores .buttons {
   flex-wrap: wrap;
   margin: 10px 0;
@@ -361,6 +423,10 @@ body > main {
   }
   #campus-stores .row {
     gap: 5px;
+  }
+  #campus-stores .handover-heading,
+  #campus-stores .handover-list li {
+    align-items: flex-start;
   }
 }
 @media (pointer: coarse) {
