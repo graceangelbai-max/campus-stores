@@ -294,11 +294,62 @@
       );
     return html;
   }
+  function handoverSnapshot() {
+    const openLoans = s.loans.filter((l) => !l.back).slice().reverse();
+    const filmLoans = openLoans.filter((l) => l.req === "RQ-214");
+    const story =
+      s.phase === 0
+        ? "Issue each Film Society unit once it leaves the counter; it will appear here for the next shift."
+        : s.phase === 1
+          ? "Record Kabir’s projector and speaker returns. The adapter stays visible until Leela brings it back."
+          : "Match Leela’s adapter to the outstanding Film Society slip before closing the screening loan.";
+    let html =
+      '<section class="handover-panel" aria-labelledby="handover-title"><div class="handover-heading"><div><small>Next-shift tool</small><h3 id="handover-title">Handover snapshot</h3></div><span class="handover-count">' +
+      openLoans.length +
+      " open " +
+      (openLoans.length === 1 ? "unit" : "units") +
+      "</span></div><p>" +
+      esc(story) +
+      "</p>";
+    if (filmLoans.length)
+      html +=
+        '<p class="handover-focus"><b>Film Society focus:</b> ' +
+        filmLoans.length +
+        " outstanding " +
+        (filmLoans.length === 1 ? "unit" : "units") +
+        ".</p>";
+    else if (s.phase > 0)
+      html +=
+        '<p class="handover-focus"><b>Film Society focus:</b> no open units recorded.</p>';
+    if (!openLoans.length)
+      return html + '<p class="handover-empty">Nothing is waiting for the next shift.</p></section>';
+    html += '<ul class="handover-list">';
+    for (const loan of openLoans) {
+      const asset = getAsset(loan.asset);
+      const request = getReq(loan.req);
+      html +=
+        "<li><div><strong>" +
+        esc(loan.asset + " · " + asset.type) +
+        "</strong><small>Slip L-" +
+        esc(loan.num) +
+        " · " +
+        esc(request.club) +
+        " · " +
+        esc(loan.who) +
+        " · Due " +
+        esc(loan.due) +
+        "</small></div>" +
+        badge("Open") +
+        "</li>";
+    }
+    return html + "</ul></section>";
+  }
   function deskbook() {
     let html = head(
       "Desk book",
       "Messages from clubs and notes for the next shift",
     );
+    html += handoverSnapshot();
     const entries = [
       [
         "Friday · 3:20 pm",
