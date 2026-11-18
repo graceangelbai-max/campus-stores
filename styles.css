@@ -334,6 +334,50 @@ body > main {
 #campus-stores .handover-empty {
   font-weight: 600;
 }
+#campus-stores .handover-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--memotxt) 24%, transparent);
+  font-size: 12px;
+}
+#campus-stores .handover-actions button {
+  background: var(--paper);
+  color: var(--memotxt);
+}
+#campus-stores .return-check {
+  margin: 0 0 16px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--sel);
+  background: var(--desk);
+}
+#campus-stores .return-check-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+#campus-stores .return-check > p {
+  margin-top: 8px;
+}
+#campus-stores .return-check form {
+  margin-top: 12px;
+}
+#campus-stores .check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+#campus-stores .check input {
+  margin: 2px 0 0;
+  accent-color: var(--sel);
+}
 #campus-stores .buttons {
   flex-wrap: wrap;
   margin: 10px 0;
