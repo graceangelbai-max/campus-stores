@@ -16,21 +16,22 @@ I added a **Handover snapshot** at the top of the **Desk book**. It is a small n
 
 - the physical asset ID and equipment type;
 - its slip number, request club, collector, and due time;
-- a Film Society count during the screening scenario; and
+- a Film Society count during the screening scenario;
+- a **Verify & return** action beside every outstanding unit; and
 - context-specific guidance as the sample shift moves from pickup to partial return to the Saturday handover.
 
-The snapshot updates automatically when a return is recorded, so the desk book remains a handover tool rather than a second manual checklist.
+A return now opens a short verification step that requires the staff member to confirm the physical asset tag before closing the slip. The Desk book also offers **Undo last return** so a counter mistake can be corrected immediately. The snapshot updates automatically, so the desk book remains a handover tool rather than a second manual checklist.
 
 ### Walkthrough
 
 1. At Friday pickup, issue the Film Society projector, speaker, and USB-C to HDMI adapter as individual loan slips.
 2. Move the story to the return time, then record the projector and speaker returns in the Loan register.
 3. Open the Desk book. The Handover snapshot keeps the adapter visible with its exact unit, slip, club, collector, and due time.
-4. Move to Saturday morning. When Leela returns the adapter, match it to the remaining Film Society slip and record the return. The snapshot changes immediately.
+4. Move to Saturday morning. In the Desk book, choose **Verify & return** beside the remaining adapter, confirm its physical asset tag, and record the verified return. The snapshot changes immediately; **Undo last return** is available if the wrong unit was closed.
 
 ### What I would measure at a real counter
 
-I would compare the time from shift start to identifying the correct outstanding unit before and after this change. I would also track how often staff ask a colleague to clarify a partial return. A shorter lookup time and fewer clarification requests would show that the snapshot is helping.
+I would compare the time from shift start to identifying the correct outstanding unit before and after this change. I would also track how often staff ask a colleague to clarify a partial return, and the percentage of returns completed from the handover view without opening another screen. A shorter lookup time, fewer clarification requests, and more handover-completed returns would show that the improvement is helping.
 
 ## Run the app
 
